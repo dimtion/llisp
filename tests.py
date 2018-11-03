@@ -132,9 +132,9 @@ def test_compute_eq(test_inputs: List[str], expected: str) -> None:
 
 @pytest.mark.parametrize(
     "test_inputs,expected",
-    [(["(<= 1 1)"], "1"), (["(<= 2 1)"], "0"), (["(<= 1 2)"], "1")],
+    [(["(< 1 1)"], "0"), (["(< 2 1)"], "0"), (["(< 1 2)"], "1")],
 )
-def test_compute_le(test_inputs: List[str], expected: str) -> None:
+def test_compute_lt(test_inputs: List[str], expected: str) -> None:
     return simple_multi(test_inputs, expected)
 
 

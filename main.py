@@ -9,7 +9,7 @@ from lbuiltins import BUILTINS, Atom, Proc, LList
 
 def listing(expr: str, parent: Union[None, LList] = None) -> Union[Atom, LList]:
     """from an expresion create a 1 dimension listing"""
-    sub_expr = []  # type: List[str]
+    sub_expr = [""]  # type: List[str]
     i = 0
     depth = 0
     max_depth = 0
@@ -40,7 +40,7 @@ def listing(expr: str, parent: Union[None, LList] = None) -> Union[Atom, LList]:
         return Atom(sub_expr[0].strip())
 
     current_list = LList()
-    # print(sub_expr)
+    print(sub_expr)
     for e in sub_expr:
         current_list.childs.append(listing(f"{e}", current_list))
     return current_list
