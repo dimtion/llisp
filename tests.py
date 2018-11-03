@@ -49,6 +49,20 @@ def test_compute_plus(test_input: str, expected: str) -> None:
 
 
 @pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        ("(- 1 1)", "0"),
+        ("(- 2 1)", "1"),
+        ("(- (- 5 2) 1)", "2"),
+        ("(- 103 1 1 1)", "100"),
+    ],
+)
+def test_compute_minus(test_input: str, expected: str) -> None:
+    e = listing(test_input, None)
+    assert str(e.evaluate({}).value) == expected
+
+
+@pytest.mark.parametrize(
     "test_inputs,expected",
     [
         (["(var x 1)", "x"], "1"),
