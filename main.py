@@ -45,6 +45,7 @@ def listing(expr: str, parent: Union[None, LList] = None) -> Union[Atom, LList]:
         current_list.childs.append(listing(f"{e}", current_list))
     return current_list
 
+
 def execute_file(filename: str, state: Dict) -> int:
     with open(filename, "r") as script_file:
         script = script_file.read()
@@ -53,6 +54,7 @@ def execute_file(filename: str, state: Dict) -> int:
         e.evaluate(state)
         return 0
 
+
 def main() -> int:
     state = {}  # type: Dict[str, str]
 
@@ -60,10 +62,10 @@ def main() -> int:
     execute_file("std.lisp", state)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("file", nargs='?', default="")
+    parser.add_argument("file", nargs="?", default="")
     args = parser.parse_args()
     if args.file:
-        return execute_file(args.file,  state)
+        return execute_file(args.file, state)
 
     print("Welcome to Loïc Lisp interpreter (llisp)")
     print("Type exit to exit")

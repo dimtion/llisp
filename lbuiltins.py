@@ -65,8 +65,10 @@ def is_int(s: str) -> bool:
     except ValueError:
         return False
 
+
 def is_char(s: str) -> bool:
     return len(s) == 3 and s[0] == s[2] == "'"
+
 
 def is_float(s: str) -> bool:
     try:
@@ -225,10 +227,12 @@ def custom_op(name: str, expr: "LList", state: Dict):
         # print(f"Evaluating {proc} with {state} and {sub_state}")
         return proc.evaluate_proc(state, sub_state)
 
+
 def echo_op(expr: "LList", state: Dict) -> "Atom":
     e = expr.childs[1].evaluate(state)
     print(e.value_str)
     return e
+
 
 BUILTINS = {
     "+": plus_op,
