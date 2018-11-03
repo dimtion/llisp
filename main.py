@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
+import argparse
 from typing import Dict, List, Union, Any, Optional
 
 from lbuiltins import BUILTINS, Atom, Proc, LList
@@ -30,24 +31,42 @@ def listing(expr: str, parent: Union[None, LList] = None) -> Union[Atom, LList]:
         ):
             i += 1
             continue
-        if len(sub_expr) <= i:
+        if len(sub_expr) <= i and not l.isspace():
             sub_expr.append(l)
         else:
-            sub_expr[i] += l
+            sub_expr[-1] += l
 
     if len(sub_expr) == 1 and max_depth == 0:
-        return Atom(sub_expr[0])
+        return Atom(sub_expr[0].strip())
 
     current_list = LList()
+    # print(sub_expr)
     for e in sub_expr:
         current_list.childs.append(listing(f"{e}", current_list))
     return current_list
 
+def execute_file(filename: str, state: Dict) -> int:
+    with open(filename, "r") as script_file:
+        script = script_file.read()
+        e = listing(script, None)
+        print(f"EXPR::{e}")
+        e.evaluate(state)
+        return 0
 
 def main() -> int:
+    state = {}  # type: Dict[str, str]
+
+    # LOAD STD LSL (Loïc Standard Library)
+    execute_file("std.lisp", state)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("file", nargs='?', default="")
+    args = parser.parse_args()
+    if args.file:
+        return execute_file(args.file,  state)
+
     print("Welcome to Loïc Lisp interpreter (llisp)")
     print("Type exit to exit")
-    state = {}  # type: Dict[str, str]
     while True:
         user_in = input(">>> ")
         if user_in == "exit":
