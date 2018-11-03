@@ -110,6 +110,16 @@ def test_compute_def(test_inputs: List[str], expected: str) -> None:
 def test_compute_eq(test_inputs: List[str], expected: str) -> None:
     return simple_multi(test_inputs, expected)
 
+@pytest.mark.parametrize(
+    "test_inputs,expected",
+    [
+        (["(<= 1 1)"], "1"),
+        (["(<= 2 1)"], "0"),
+        (["(<= 1 2)"], "1"),
+    ],
+)
+def test_compute_le(test_inputs: List[str], expected: str) -> None:
+    return simple_multi(test_inputs, expected)
 
 @pytest.mark.parametrize(
     "test_inputs,expected",
@@ -184,4 +194,14 @@ def test_compute_if(test_inputs: List[str], expected: str) -> None:
     ],
 )
 def test_compute_if_def(test_inputs: List[str], expected: str) -> None:
+    return simple_multi(test_inputs, expected)
+
+
+@pytest.mark.parametrize(
+    "test_inputs,expected",
+    [
+        (["(def (fact n) (if (eq n 0) 1 (* n (fact (- n 1)))))", "(fact 10)"], "3628800"),
+    ],
+)
+def test_compute_recursive_def(test_inputs: List[str], expected: str) -> None:
     return simple_multi(test_inputs, expected)
