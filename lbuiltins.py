@@ -5,7 +5,7 @@ from enum import Enum
 class Atom(object):
     class AtomTypes(Enum):
         NUM = 1
-        STR = 2
+        CHAR = 2
         NAME = 3
         VAR = 4
         PROC = 5
@@ -18,6 +18,12 @@ class Atom(object):
         if is_int(self.value_str):
             self.value = int(self.value_str)
             self.type = self.AtomTypes.NUM
+        elif is_float(self.value_str):
+            self.value = float(self.value_str)
+            self.type = self.AtomTypes.NUM
+        elif is_char(self.value_str):
+            self.value = self.value_str[1]
+            self.type = self.AtomTypes.CHAR
         elif is_name(self.value_str):
             self.value = self.value_str
             self.type = self.AtomTypes.NAME
@@ -39,11 +45,14 @@ class Atom(object):
     def times(self, other: "Atom"):
         return Atom(str(self.value * other.value))
 
+    def divide(self, other: "Atom"):
+        return Atom(str(self.value / other.value))
+
     def __eq__(self, other):
         return self.type == other.type and self.value == other.value
 
-    def __le__(self, other):
-        return self.type == other.type and self.value <= other.value
+    def __lt__(self, other):
+        return self.type == other.type and self.value < other.value
 
     def __repr__(self):
         return f"({self.type}) {self.value}"
@@ -56,6 +65,16 @@ def is_int(s: str) -> bool:
     except ValueError:
         return False
 
+def is_char(s: str) -> bool:
+    return len(s) == 3 and s[0] == s[2] == "'"
+
+def is_float(s: str) -> bool:
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
 
 def is_name(s: str) -> bool:
     """returns if the token is a valid variable name"""
@@ -64,13 +83,14 @@ def is_name(s: str) -> bool:
     if is_int(s[0]):
         return False
 
-    if s in s in "*+-/<=>=":
-        return True
-    return s.isalnum()
+    for l in s:
+        if not l.isalnum() and l not in "*+-/<>=!@#$%^&":
+            return False
+    return True
 
 
 class Proc(Atom):
-    def __init__(self, name: "Atom", params: "LList", body: "Union[Atom, LList]"):
+    def __init__(self, name: "Atom", params: "LList", body: "LList"):
         self.name = name
         self.params = params
         self.body = body
@@ -79,7 +99,9 @@ class Proc(Atom):
 
     def evaluate_proc(self, state: Dict, sub_state: Dict) -> Atom:
         temp_state = {**state, **sub_state}
-        return self.body.evaluate(temp_state)
+        for child in self.body.childs[2:]:
+            result = child.evaluate(temp_state)
+        return result
 
 
 class LList(object):
@@ -127,6 +149,13 @@ def times_op(expr: "LList", state: Dict) -> "Atom":
     return x
 
 
+def divide_op(expr: "LList", state: Dict) -> "Atom":
+    x = expr.childs[1].evaluate(state)
+    for y in expr.childs[2:]:
+        x = x.divide(y.evaluate(state))
+    return x
+
+
 def if_op(expr: "LList", state: Dict) -> "Atom":
     req = expr.childs[1].evaluate(state)
     if req.value != 0:
@@ -144,10 +173,18 @@ def eq_op(expr: "LList", state: Dict) -> "Atom":
         return Atom("0")
 
 
-def less_eq_op(expr: "LList", state: Dict) -> "Atom":
+def not_op(expr: "LList", state: Dict) -> "Atom":
+    left = expr.childs[1].evaluate(state)
+    if left.value == 0:
+        return Atom("1")
+    else:
+        return Atom("0")
+
+
+def less_op(expr: "LList", state: Dict) -> "Atom":
     left = expr.childs[1].evaluate(state)
     right = expr.childs[2].evaluate(state)
-    if left <= right:
+    if left < right:
         return Atom("1")
     else:
         return Atom("0")
@@ -156,7 +193,7 @@ def less_eq_op(expr: "LList", state: Dict) -> "Atom":
 def var_op(expr: "LList", state: Dict) -> "Atom":
     if isinstance(expr.childs[1], Atom) and expr.childs[1].type == Atom.AtomTypes.NAME:
         state[expr.childs[1].value] = expr.childs[2].evaluate(state)
-        print(f"<<< {expr.childs[1].value} = {expr.childs[2]}")
+        # print(f"<<< {expr.childs[1].value} = {expr.childs[2]}")
         return expr.childs[1]
     else:
         raise Exception("Unexpected format")
@@ -167,14 +204,14 @@ def def_op(expr: "LList", state: Dict) -> "Atom":
         name = expr.childs[1].childs[0]
         params = LList()
         params.childs = expr.childs[1].childs[1:]
-        body = expr.childs[2]
+        body = expr
 
         if not isinstance(name, Atom):
             raise Exception(f"Unexpected format of function name f{name}")
 
         a = Proc(name, params, body)
         state[name.value] = a
-        print(f"<<< ({a} {a.params})")
+        # print(f"<<< ({a} {a.params})")
         return name
     raise Exception("Unexpected format")
 
@@ -188,14 +225,21 @@ def custom_op(name: str, expr: "LList", state: Dict):
         # print(f"Evaluating {proc} with {state} and {sub_state}")
         return proc.evaluate_proc(state, sub_state)
 
+def echo_op(expr: "LList", state: Dict) -> "Atom":
+    e = expr.childs[1].evaluate(state)
+    print(e.value_str)
+    return e
 
 BUILTINS = {
     "+": plus_op,
     "-": minus_op,
     "*": times_op,
+    "/": divide_op,
     "if": if_op,
     "eq": eq_op,
-    "<=": less_eq_op,
+    # "!": not_op,
+    "<": less_op,
     "var": var_op,
     "def": def_op,
+    "echo": echo_op,
 }
