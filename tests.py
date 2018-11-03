@@ -127,18 +127,59 @@ def test_compute_eq(test_inputs: List[str], expected: str) -> None:
 def test_compute_if(test_inputs: List[str], expected: str) -> None:
     return simple_multi(test_inputs, expected)
 
+
 @pytest.mark.parametrize(
     "test_inputs,expected",
     [
-        (["(def (isincr x y) (eq y (+ x 1)))", "(var a 2)", "(if (isincr 2 3) 10 0)"], "10"),
+        (
+            [
+                "(def (isincr x y) (eq y (+ x 1)))",
+                "(var a 2)",
+                "(if (isincr 2 3) 10 0)",
+            ],
+            "10",
+        ),
         (["(def (eqbis x y) (if (eq x y) 1 0)", "(eqbis 72 72)"], "1"),
         (["(def (eqbis x y) (if (eq x y) 1 0)", "(eqbis 72 79)"], "0"),
-        (["(def (eqbis x y) (if (eq x y) 1 0)", "(var x 10)", "(var b 100)", "(eqbis x b)"], "0"),
-        (["(def (eqbis x y) (if (eq x y) 1 0)", "(var x 10)", "(var b 10)", "(eqbis x b)"], "1"),
-        (["(def (eqbis x y) (if (eq x y) 1 0)", "(var x 10)", "(var b x)", "(eqbis x b)"], "1"),
-        (["(def (sumint x) (if (eq x 0) 0 (+ (sumint (- x 1)) x)))", "(sumint 0)"], "0"),
-        (["(def (sumint x) (if (eq x 0) 0 (+ (sumint (- x 1)) x)))", "(sumint 1)"], "1"),
-        (["(def (sumint x) (if (eq x 0) 0 (+ (sumint (- x 1)) x)))", "(sumint 10)"], "55"),
+        (
+            [
+                "(def (eqbis x y) (if (eq x y) 1 0)",
+                "(var x 10)",
+                "(var b 100)",
+                "(eqbis x b)",
+            ],
+            "0",
+        ),
+        (
+            [
+                "(def (eqbis x y) (if (eq x y) 1 0)",
+                "(var x 10)",
+                "(var b 10)",
+                "(eqbis x b)",
+            ],
+            "1",
+        ),
+        (
+            [
+                "(def (eqbis x y) (if (eq x y) 1 0)",
+                "(var x 10)",
+                "(var b x)",
+                "(eqbis x b)",
+            ],
+            "1",
+        ),
+        (
+            ["(def (sumint x) (if (eq x 0) 0 (+ (sumint (- x 1)) x)))", "(sumint 0)"],
+            "0",
+        ),
+        (
+            ["(def (sumint x) (if (eq x 0) 0 (+ (sumint (- x 1)) x)))", "(sumint 1)"],
+            "1",
+        ),
+        (
+            ["(def (sumint x) (if (eq x 0) 0 (+ (sumint (- x 1)) x)))", "(sumint 10)"],
+            "55",
+        ),
     ],
 )
 def test_compute_if_def(test_inputs: List[str], expected: str) -> None:
