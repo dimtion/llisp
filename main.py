@@ -20,9 +20,14 @@ def listing(expr: str, parent: Union[None, LList] = None) -> Union[Atom, LList]:
                 continue
         elif l == ")":
             depth -= 1
-            if depth <= 1:
+            if depth <= 0:
                 continue
-        if depth <= 1 and l == " " and len(sub_expr) == i + 1 and len(sub_expr[i]) > 0:
+        if (
+            depth <= 0
+            and l.isspace()
+            and len(sub_expr) == i + 1
+            and len(sub_expr[i]) > 0
+        ):
             i += 1
             continue
         if len(sub_expr) <= i:

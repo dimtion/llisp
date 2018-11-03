@@ -89,7 +89,9 @@ class LList(object):
     def evaluate(self, state: Union[Dict]) -> Atom:
         action = self.childs[0]
         if not isinstance(action, Atom):
-            raise Exception(f"ERR: {action} not atomic")
+            for child in self.childs:
+                result = child.evaluate(state)
+            return result
         if action.type == Atom.AtomTypes.NUM:
             return action
         if action.type == Atom.AtomTypes.NAME:
@@ -167,12 +169,14 @@ def def_op(expr: "LList", state: Dict) -> "Atom":
         params.childs = expr.childs[1].childs[1:]
         body = expr.childs[2]
 
+        if not isinstance(name, Atom):
+            raise Exception(f"Unexpected format of function name f{name}")
+
         a = Proc(name, params, body)
-        state[expr.childs[1].childs[0].value] = a
+        state[name.value] = a
         print(f"<<< ({a} {a.params})")
-        return expr.childs[1].childs[0]
-    else:
-        raise Exception("Unexpected format")
+        return name
+    raise Exception("Unexpected format")
 
 
 def custom_op(name: str, expr: "LList", state: Dict):

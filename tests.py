@@ -220,3 +220,10 @@ def test_compute_if_def(test_inputs: List[str], expected: str) -> None:
 )
 def test_compute_recursive_def(test_inputs: List[str], expected: str) -> None:
     return simple_multi(test_inputs, expected)
+
+
+@pytest.mark.parametrize(
+    "test_inputs,expected", [(["(var x 5) (var y 10) (+ x y)"], "15")]
+)
+def test_compute_multi_expr(test_inputs: List[str], expected: str) -> None:
+    return simple_multi(test_inputs, expected)
