@@ -52,6 +52,25 @@ def test_compute_plus(test_input: str, expected: str) -> None:
 @pytest.mark.parametrize(
     "test_input,expected",
     [
+        ("1 ", "1"),
+        (" 1", "1"),
+        ("( 1)", "1"),
+        ("(1 )", "1"),
+        ("( + 1 1)", "2"),
+        ("(+  1 1)", "2"),
+        ("( +  1 1)", "2"),
+        ("( + 1 (+ 1 1) )", "3"),
+    ],
+)
+def test_input_variants(test_input: str, expected: str) -> None:
+    e = listing(test_input, None)
+    print(f"EXPR::{e}")
+    assert str(e.evaluate({}).value) == expected
+
+
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
         ("(- 1 1)", "0"),
         ("(- 2 1)", "1"),
         ("(- (- 5 2) 1)", "2"),
@@ -110,16 +129,14 @@ def test_compute_def(test_inputs: List[str], expected: str) -> None:
 def test_compute_eq(test_inputs: List[str], expected: str) -> None:
     return simple_multi(test_inputs, expected)
 
+
 @pytest.mark.parametrize(
     "test_inputs,expected",
-    [
-        (["(<= 1 1)"], "1"),
-        (["(<= 2 1)"], "0"),
-        (["(<= 1 2)"], "1"),
-    ],
+    [(["(<= 1 1)"], "1"), (["(<= 2 1)"], "0"), (["(<= 1 2)"], "1")],
 )
 def test_compute_le(test_inputs: List[str], expected: str) -> None:
     return simple_multi(test_inputs, expected)
+
 
 @pytest.mark.parametrize(
     "test_inputs,expected",
@@ -199,9 +216,7 @@ def test_compute_if_def(test_inputs: List[str], expected: str) -> None:
 
 @pytest.mark.parametrize(
     "test_inputs,expected",
-    [
-        (["(def (fact n) (if (eq n 0) 1 (* n (fact (- n 1)))))", "(fact 10)"], "3628800"),
-    ],
+    [(["(def (fact n) (if (eq n 0) 1 (* n (fact (- n 1)))))", "(fact 10)"], "3628800")],
 )
 def test_compute_recursive_def(test_inputs: List[str], expected: str) -> None:
     return simple_multi(test_inputs, expected)

@@ -22,7 +22,7 @@ def listing(expr: str, parent: Union[None, LList] = None) -> Union[Atom, LList]:
             depth -= 1
             if depth <= 1:
                 continue
-        if depth <= 1 and l == " " and len(sub_expr) == i + 1:
+        if depth <= 1 and l == " " and len(sub_expr) == i + 1 and len(sub_expr[i]) > 0:
             i += 1
             continue
         if len(sub_expr) <= i:

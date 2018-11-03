@@ -11,7 +11,7 @@ class Atom(object):
         PROC = 5
 
     def __init__(self, value: str):
-        self.value_str = value
+        self.value_str = value.strip()
         self.parse()
 
     def parse(self):
@@ -21,6 +21,8 @@ class Atom(object):
         elif is_name(self.value_str):
             self.value = self.value_str
             self.type = self.AtomTypes.NAME
+        else:
+            raise Exception(f"Parse ERROR: {self.value_str}")
 
     def evaluate(self, state: Dict) -> "Atom":
         if self.type == self.AtomTypes.NAME:
@@ -29,13 +31,13 @@ class Atom(object):
 
     # For num
     def plus(self, other: "Atom"):
-        return Atom(self.value + other.value)
+        return Atom(str(self.value + other.value))
 
     def minus(self, other: "Atom"):
-        return Atom(self.value - other.value)
+        return Atom(str(self.value - other.value))
 
     def times(self, other: "Atom"):
-        return Atom(self.value * other.value)
+        return Atom(str(self.value * other.value))
 
     def __eq__(self, other):
         return self.type == other.type and self.value == other.value
@@ -171,6 +173,7 @@ def def_op(expr: "LList", state: Dict) -> "Atom":
         return expr.childs[1].childs[0]
     else:
         raise Exception("Unexpected format")
+
 
 def custom_op(name: str, expr: "LList", state: Dict):
     proc = state[name]
