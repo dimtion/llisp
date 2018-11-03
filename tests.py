@@ -1,6 +1,7 @@
 import pytest
 from typing import Dict, List
-from main import listing, is_int
+from main import listing
+from lbuiltins import is_int
 
 
 def simple_multi(test_inputs: List[str], expected: str) -> None:
