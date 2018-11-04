@@ -254,3 +254,15 @@ def test_compute_multi_expr(test_inputs: List[str], expected: str) -> None:
 )
 def test_compute_list(test_inputs: List[str], expected: str) -> None:
     return simple_multi(test_inputs, expected)
+
+
+@pytest.mark.parametrize(
+    "test_inputs,expected",
+    [
+        (['(var x "a"', "(eq x (list 'a'))"], "1"),
+        (['(var x "abcd"', "(eq x (list 'a' 'b' 'c' 'd'))"], "1"),
+        (['(var x "ab d"', "(eq x (list 'a' 'b' ' ' 'd'))"], "1"),
+    ],
+)
+def test_compute_str(test_inputs: List[str], expected: str) -> None:
+    return simple_multi(test_inputs, expected)

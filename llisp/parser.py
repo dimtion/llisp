@@ -42,7 +42,17 @@ def listing(expr: str, parent: Union[None, LList] = None) -> Union[Atom, LList]:
             sub_expr[-1] += e
 
     if len(sub_expr) == 1 and max_depth == 0:
-        return Atom(sub_expr[0].strip())
+        current_expr = sub_expr[0].strip()
+        if current_expr[0] == current_expr[-1] == '"':
+            new_expr = "(list"
+            for c in current_expr[1:-1]:
+                c = f" '{c}'"
+                new_expr += c
+            new_expr += ")"
+            sub_expr[0] = new_expr
+
+        else:
+            return Atom(sub_expr[0].strip())
 
     current_list = LList()
     # print(sub_expr)

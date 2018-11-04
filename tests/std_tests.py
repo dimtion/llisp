@@ -121,3 +121,35 @@ def test_min(
     std_state: Dict[str, object], test_inputs: List[str], expected: str
 ) -> None:
     return simple_multi_std(std_state, test_inputs, expected)
+
+
+@pytest.mark.parametrize(
+    "test_inputs,expected",
+    [
+        (["(chartoint '0')"], "0"),
+        (["(chartoint '1')"], "1"),
+        (["(chartoint '2')"], "2"),
+        (["(chartoint '3')"], "3"),
+        (["(chartoint '9')"], "9"),
+    ],
+)
+def test_chartoint(
+    std_state: Dict[str, object], test_inputs: List[str], expected: str
+) -> None:
+    return simple_multi_std(std_state, test_inputs, expected)
+
+
+@pytest.mark.parametrize(
+    "test_inputs,expected",
+    [
+        (['(toint "0")'], "0"),
+        (['(toint "1")'], "1"),
+        (['(toint "11")'], "11"),
+        (['(toint "123")'], "123"),
+        (['(toint "9029")'], "9029"),
+    ],
+)
+def test_toint(
+    std_state: Dict[str, object], test_inputs: List[str], expected: str
+) -> None:
+    return simple_multi_std(std_state, test_inputs, expected)
