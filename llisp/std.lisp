@@ -2,7 +2,7 @@
      (if (eq x 0) 0 1))
 
 (def (! x)
-     (- 1 x))
+     (- 1 (bool x)))
 
 (def (and x y)
      (eq (+ (bool x) (bool y)) 2))
