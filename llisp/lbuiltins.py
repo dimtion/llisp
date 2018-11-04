@@ -68,11 +68,17 @@ class Atom(object):
     def divide(self, other: "Atom"):
         return Atom(str(self.value / other.value))
 
+    def divide_int(self, other: "Atom"):
+        return Atom(str(self.value // other.value))
+
     def __eq__(self, other):
         return self.type == other.type and self.value == other.value
 
     def __lt__(self, other):
         return self.type == other.type and self.value < other.value
+
+    def modulo(self, other):
+        return Atom(str(self.value % other.value))
 
     def __repr__(self):
         return f"({self.type}) {self.value}"
@@ -184,6 +190,19 @@ def divide_op(expr: "LList", state: Dict) -> "Atom":
     for y in expr.childs[2:]:
         x = x.divide(y.evaluate(state))
     return x
+
+
+def divide_int_op(expr: "LList", state: Dict) -> "Atom":
+    x = expr.childs[1].evaluate(state)
+    for y in expr.childs[2:]:
+        x = x.divide_int(y.evaluate(state))
+    return x
+
+
+def mod_op(expr: "LList", state: Dict) -> "Atom":
+    x = expr.childs[1].evaluate(state)
+    y = expr.childs[2].evaluate(state)
+    return x.modulo(y)
 
 
 def if_op(expr: "LList", state: Dict) -> "Atom":
@@ -310,6 +329,8 @@ BUILTINS: Dict[str, Callable[[LList, Dict], Atom]] = {
     "-": minus_op,
     "*": times_op,
     "/": divide_op,
+    "//": divide_int_op,
+    "%": mod_op,
     "if": if_op,
     "eq": eq_op,
     "<": less_op,
