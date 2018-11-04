@@ -303,7 +303,6 @@ BUILTINS: Dict[str, Callable[[LList, Dict], Atom]] = {
     "/": divide_op,
     "if": if_op,
     "eq": eq_op,
-    # "!": not_op,
     "<": less_op,
     "var": var_op,
     "def": def_op,

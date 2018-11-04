@@ -10,9 +10,10 @@ format:
 	black .
 
 lint:
-	isort -rc --check-only $(MODULES)
 	flake8
 	mypy llisp
+	isort -rc --check-only $(MODULES)
+	black --check .
 
 venv:
 	virtualenv -p $(PYTHON) $(VENV)

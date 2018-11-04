@@ -37,7 +37,7 @@ def listing(expr: str, parent: Union[None, LList] = None) -> Union[Atom, LList]:
         return Atom(sub_expr[0].strip())
 
     current_list = LList()
-    print(sub_expr)
+    # print(sub_expr)
     for e in sub_expr:
         current_list.childs.append(listing(f"{e}", current_list))
     return current_list

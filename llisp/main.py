@@ -18,19 +18,18 @@ def execute_file(filename: str, state: Dict, debug=False) -> int:
         return 0
 
 
-def main() -> int:
-    state: Dict[str, str] = {}
-
-    # LOAD STD LSL (Loïc Standard Library)
+def load_std(state: Dict[str, str]) -> None:
     STD_PATH = os.path.join(os.path.dirname(__file__), "std.lisp")
     execute_file(STD_PATH, state)
 
+
+def arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("file", nargs="?", default="")
-    args = parser.parse_args()
-    if args.file:
-        return execute_file(args.file, state)
+    return parser.parse_args()
 
+
+def repl(state: Dict[str, str]) -> int:
     print("Welcome to Loïc Lisp interpreter (llisp)")
     print("Type exit to exit")
     while True:
@@ -43,6 +42,18 @@ def main() -> int:
             evaluation = e.evaluate(state)
             if evaluation is not None:
                 print(f"<<< {evaluation.value}")
+
+
+def main() -> int:
+    state: Dict[str, str] = {}
+
+    load_std(state)
+
+    args = arguments()
+    if args.file:
+        return execute_file(args.file, state)
+    else:
+        return repl(state)
 
 
 if __name__ == "__main__":
