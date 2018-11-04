@@ -13,6 +13,7 @@ def listing(expr: str, parent: Union[None, LList] = None) -> Union[Atom, LList]:
     i = 0
     depth = 0
     max_depth = 0
+    expr = expr.strip()
     for l in expr:
         if l == "(":
             depth += 1
@@ -46,11 +47,12 @@ def listing(expr: str, parent: Union[None, LList] = None) -> Union[Atom, LList]:
     return current_list
 
 
-def execute_file(filename: str, state: Dict) -> int:
+def execute_file(filename: str, state: Dict, debug=False) -> int:
     with open(filename, "r") as script_file:
         script = script_file.read()
         e = listing(script, None)
-        print(f"EXPR::{e}")
+        if debug:
+            print(f"EXPR::{e}")
         e.evaluate(state)
         return 0
 

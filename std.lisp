@@ -47,3 +47,30 @@
 (var pi 3.141592)
 
 (var e 2.718281)
+
+(var [] (pop (list 0)))
+
+(def (len l)
+     (if (eq l [])
+     0
+     (+ 1 (len (pop l)))))
+
+(def (find e l)
+     (if (eq e (el l))
+         0
+         (+ 1 (find e (pop l)))))
+
+(def (reverse l)
+     (def (helper l m)
+          (if (eq l [])
+          m
+          (helper (pop l) (push (el l) m))))
+     (helper l []))
+
+(def (concat a b)
+     (def (helper a b)
+          (if (eq a [])
+              b
+              (helper (pop a) (push (el a) b))))
+     (helper (reverse a) b))
+     

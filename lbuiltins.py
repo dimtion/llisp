@@ -1,5 +1,6 @@
-from typing import Dict, Union, List
+from typing import Dict, Union, List, Callable, Any
 from enum import Enum
+import copy
 
 
 class Atom(object):
@@ -9,10 +10,18 @@ class Atom(object):
         NAME = 3
         VAR = 4
         PROC = 5
+        LIST = 6
 
-    def __init__(self, value: str):
-        self.value_str = value.strip()
-        self.parse()
+    value = None  # type: Any
+
+    def __init__(self, value: Union[str, "LList"]):
+        if isinstance(value, str):
+            self.value_str = value.strip()
+            self.parse()
+        else:
+            self.value_str = str(value)
+            self.value = value
+            self.type = self.AtomTypes.LIST
 
     def parse(self):
         if is_int(self.value_str):
@@ -32,8 +41,16 @@ class Atom(object):
 
     def evaluate(self, state: Dict) -> "Atom":
         if self.type == self.AtomTypes.NAME:
-            return state[self.value].evaluate(state)
-        return self
+            if self.value in state:
+                return state[self.value].evaluate(state)
+        elif self.type in [
+            self.AtomTypes.LIST,
+            self.AtomTypes.NUM,
+            self.AtomTypes.CHAR,
+        ]:
+            return self
+
+        raise Exception(f"Cannot evaluate {self}")
 
     # For num
     def plus(self, other: "Atom"):
@@ -86,7 +103,7 @@ def is_name(s: str) -> bool:
         return False
 
     for l in s:
-        if not l.isalnum() and l not in "*+-/<>=!@#$%^&":
+        if not l.isalnum() and l not in "*+-/<>=!@#$%^&[]":
             return False
     return True
 
@@ -125,6 +142,14 @@ class LList(object):
                 return custom_op(action.value_str, self, state)
 
         raise Exception(f"ERR: Symbol {action} unknown")
+
+    def __eq__(self, other):
+        if len(self.childs) != len(other.childs):
+            return False
+        for s, o in zip(self.childs, other.childs):
+            if s != o:
+                return False
+        return True
 
     def __repr__(self):
         return str(self.childs)
@@ -186,7 +211,7 @@ def not_op(expr: "LList", state: Dict) -> "Atom":
 def less_op(expr: "LList", state: Dict) -> "Atom":
     left = expr.childs[1].evaluate(state)
     right = expr.childs[2].evaluate(state)
-    if left < right:
+    if isinstance(left, Atom) and left < right:
         return Atom("1")
     else:
         return Atom("0")
@@ -218,7 +243,7 @@ def def_op(expr: "LList", state: Dict) -> "Atom":
     raise Exception("Unexpected format")
 
 
-def custom_op(name: str, expr: "LList", state: Dict):
+def custom_op(name: str, expr: "LList", state: Dict) -> "Atom":
     proc = state[name]
     if proc.type == Atom.AtomTypes.PROC:
         sub_state = {}  # type: Dict[str, Union[LList, Atom]]
@@ -226,12 +251,49 @@ def custom_op(name: str, expr: "LList", state: Dict):
             sub_state[p.value_str] = c.evaluate(state)
         # print(f"Evaluating {proc} with {state} and {sub_state}")
         return proc.evaluate_proc(state, sub_state)
+    raise Exception(f"{name} not a procedure")
 
 
 def echo_op(expr: "LList", state: Dict) -> "Atom":
     e = expr.childs[1].evaluate(state)
     print(e.value_str)
     return e
+
+
+def list_op(expr: "LList", state: Dict) -> "Atom":
+    l = LList()
+    if len(expr.childs) > 1:
+        for c in expr.childs[1:]:
+            l.childs.append(copy.deepcopy(c).evaluate(state))
+    return Atom(l)
+
+
+def push_op(expr: "LList", state: Dict) -> "Atom":
+    e = expr.childs[1].evaluate(state)
+    old_list = expr.childs[2].evaluate(state)
+    new_list = LList()
+    new_list.childs.append(copy.deepcopy(e))
+    if isinstance(old_list, Atom) and old_list.type == old_list.AtomTypes.LIST:
+        for c in old_list.value.childs:
+            new_list.childs.append(copy.deepcopy(c))
+    else:
+        raise Exception("Cannot push")
+
+    return Atom(new_list)
+
+
+def pop_op(expr: "LList", state: Dict) -> "Atom":
+    old_list = expr.childs[1].evaluate(state)
+    new_list = LList()
+    if isinstance(old_list, Atom) and old_list.type == old_list.AtomTypes.LIST:
+        for c in old_list.value.childs[1:]:
+            new_list.childs.append(copy.deepcopy(c))
+
+    return Atom(new_list)
+
+
+def el_op(expr: "LList", state: Dict) -> "Atom":
+    return expr.childs[1].evaluate(state).value.childs[0].evaluate(state)
 
 
 BUILTINS = {
@@ -246,4 +308,8 @@ BUILTINS = {
     "var": var_op,
     "def": def_op,
     "echo": echo_op,
-}
+    "list": list_op,
+    "push": push_op,
+    "pop": pop_op,
+    "el": el_op,
+}  # type: Dict[str, Callable[[LList, Dict], Atom]]
