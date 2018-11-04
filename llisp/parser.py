@@ -10,8 +10,14 @@ def listing(expr: str, parent: Union[None, LList] = None) -> Union[Atom, LList]:
     depth = 0
     max_depth = 0
     expr = expr.strip()
+    in_string = False
     for e in expr:
-        if e == "(":
+        if in_string:
+            sub_expr[-1] += e
+            if e in "'\"":
+                in_string = False
+            continue
+        elif e == "(":
             depth += 1
             max_depth += 1
             if depth <= 1:
@@ -20,6 +26,8 @@ def listing(expr: str, parent: Union[None, LList] = None) -> Union[Atom, LList]:
             depth -= 1
             if depth <= 0:
                 continue
+        elif e in "'\"":
+            in_string = True
         if (
             depth <= 0
             and e.isspace()

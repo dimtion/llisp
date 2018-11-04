@@ -74,3 +74,8 @@
               (helper (pop a) (push (el a) b))))
      (helper (reverse a) b))
      
+(def (elist l)
+     (if (eq l [])
+      0
+      ((echo (el l))
+      (elist (pop l))))

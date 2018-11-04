@@ -31,7 +31,10 @@ class Atom(object):
             self.value = float(self.value_str)
             self.type = self.AtomTypes.NUM
         elif is_char(self.value_str):
-            self.value = self.value_str[1]
+            iner_char = bytes(self.value_str[1:-1], "utf-8").decode("unicode_escape")
+            if len(iner_char) > 1:
+                raise Exception(f"Parse ERROR: {self.value_str} is not a CHAR")
+            self.value = iner_char
             self.type = self.AtomTypes.CHAR
         elif is_name(self.value_str):
             self.value = self.value_str
@@ -84,7 +87,7 @@ def is_int(s: str) -> bool:
 
 
 def is_char(s: str) -> bool:
-    return len(s) == 3 and s[0] == s[2] == "'"
+    return s[0] == s[-1] == "'"
 
 
 def is_float(s: str) -> bool:
@@ -256,6 +259,12 @@ def custom_op(name: str, expr: "LList", state: Dict) -> "Atom":
 
 def echo_op(expr: "LList", state: Dict) -> "Atom":
     e = expr.childs[1].evaluate(state)
+    print(e.value, end="", flush=True)
+    return e
+
+
+def print_op(expr: "LList", state: Dict) -> "Atom":
+    e = expr.childs[1].evaluate(state)
     print(e.value_str)
     return e
 
@@ -307,6 +316,7 @@ BUILTINS: Dict[str, Callable[[LList, Dict], Atom]] = {
     "var": var_op,
     "def": def_op,
     "echo": echo_op,
+    "print": print_op,
     "list": list_op,
     "push": push_op,
     "pop": pop_op,

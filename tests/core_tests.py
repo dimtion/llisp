@@ -34,6 +34,14 @@ def test_is_int(test_input: str, expected: bool) -> None:
 
 
 @pytest.mark.parametrize(
+    "test_input,expected", [("'1'", "1"), ("'a'", "a"), ("' '", " "), ("'\n'", "\n")]
+)
+def test_compute_char(test_input: str, expected: str) -> None:
+    e = listing(test_input, None)
+    assert str(e.evaluate({}).value) == expected
+
+
+@pytest.mark.parametrize(
     "test_input,expected",
     [
         ("1", "1"),
@@ -231,4 +239,18 @@ def test_compute_recursive_def(test_inputs: List[str], expected: str) -> None:
     ],
 )
 def test_compute_multi_expr(test_inputs: List[str], expected: str) -> None:
+    return simple_multi(test_inputs, expected)
+
+
+@pytest.mark.parametrize(
+    "test_inputs,expected",
+    [
+        (["(var x (list 1))", "(eq x (list 1))"], "1"),
+        (["(var x (list 1))", "(eq x (list 2))"], "0"),
+        (["(var x (list 1 2))", "(eq x (list 1 2))"], "1"),
+        (["(var x (list 1 2))", "(eq x (list 2 1))"], "0"),
+        (["(var a 1)", "(var x (list a 2))", "(eq x (list 1 2))"], "1"),
+    ],
+)
+def test_compute_list(test_inputs: List[str], expected: str) -> None:
     return simple_multi(test_inputs, expected)
