@@ -1,10 +1,9 @@
-from typing import List, Union
+from typing import List, Tuple, Union
 
 from llisp.lbuiltins import Atom, LList
 
 
-def listing(expr: str, parent: Union[None, LList] = None) -> Union[Atom, LList]:
-    """from an expresion create a 1 dimension listing"""
+def lexer(expr: str) -> Tuple[List[str], int]:
     sub_expr: List[str] = [""]
     i = 0
     depth = 0
@@ -41,21 +40,40 @@ def listing(expr: str, parent: Union[None, LList] = None) -> Union[Atom, LList]:
         else:
             sub_expr[-1] += e
 
-    if len(sub_expr) == 1 and max_depth == 0:
-        current_expr = sub_expr[0].strip()
+    return sub_expr, max_depth
+
+
+def expand_str(expr: List[str], max_depth) -> Union[List[str], Atom]:
+    """Create a list of char from the string notation"""
+    if len(expr) == 1 and max_depth == 0:
+        current_expr = expr[0].strip()
         if current_expr[0] == current_expr[-1] == '"':
             new_expr = "(list"
             for c in current_expr[1:-1]:
                 c = f" '{c}'"
                 new_expr += c
             new_expr += ")"
-            sub_expr[0] = new_expr
+            expr[0] = new_expr
 
         else:
-            return Atom(sub_expr[0].strip())
+            return Atom(expr[0].strip())
 
+    return expr
+
+
+def atomize(expr: List["str"]):
+    """Instanciate Atoms and sub LList from the tokens"""
     current_list = LList()
-    # print(sub_expr)
-    for e in sub_expr:
+    # print(expr)
+    for e in expr:
         current_list.childs.append(listing(f"{e}", current_list))
     return current_list
+
+
+def listing(expr: str, parent: Union[None, LList] = None) -> Union[Atom, LList]:
+    """From an expression returns an AST tree that can be evaluated"""
+    tokens, max_depth = lexer(expr)
+    expanded_tokens = expand_str(tokens, max_depth)
+    if isinstance(expanded_tokens, Atom):
+        return expanded_tokens
+    return atomize(tokens)
