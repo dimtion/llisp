@@ -1,0 +1,9 @@
+[tool.black]
+py36 = true
+exclude = '''
+/(
+    \.git
+  | \.mypy_cache
+  | venv
+)/
+'''

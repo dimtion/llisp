@@ -1,6 +1,6 @@
-from typing import Dict, Union, List, Callable, Any
-from enum import Enum
 import copy
+from enum import Enum
+from typing import Any, Callable, Dict, List, Union
 
 
 class Atom(object):
@@ -12,7 +12,7 @@ class Atom(object):
         PROC = 5
         LIST = 6
 
-    value = None  # type: Any
+    value: Any = None
 
     def __init__(self, value: Union[str, "LList"]):
         if isinstance(value, str):
@@ -125,7 +125,7 @@ class Proc(Atom):
 
 class LList(object):
     def __init__(self):
-        self.childs = []  # type: List[Union[LList, Atom]]
+        self.childs: List[Union[LList, Atom]] = []
 
     def evaluate(self, state: Union[Dict]) -> Atom:
         action = self.childs[0]
@@ -246,7 +246,7 @@ def def_op(expr: "LList", state: Dict) -> "Atom":
 def custom_op(name: str, expr: "LList", state: Dict) -> "Atom":
     proc = state[name]
     if proc.type == Atom.AtomTypes.PROC:
-        sub_state = {}  # type: Dict[str, Union[LList, Atom]]
+        sub_state: Dict[str, Union[LList, Atom]] = {}
         for p, c in zip(proc.params.childs, expr.childs[1:]):
             sub_state[p.value_str] = c.evaluate(state)
         # print(f"Evaluating {proc} with {state} and {sub_state}")
@@ -261,11 +261,11 @@ def echo_op(expr: "LList", state: Dict) -> "Atom":
 
 
 def list_op(expr: "LList", state: Dict) -> "Atom":
-    l = LList()
+    new_list = LList()
     if len(expr.childs) > 1:
         for c in expr.childs[1:]:
-            l.childs.append(copy.deepcopy(c).evaluate(state))
-    return Atom(l)
+            new_list.childs.append(copy.deepcopy(c).evaluate(state))
+    return Atom(new_list)
 
 
 def push_op(expr: "LList", state: Dict) -> "Atom":
@@ -296,7 +296,7 @@ def el_op(expr: "LList", state: Dict) -> "Atom":
     return expr.childs[1].evaluate(state).value.childs[0].evaluate(state)
 
 
-BUILTINS = {
+BUILTINS: Dict[str, Callable[[LList, Dict], Atom]] = {
     "+": plus_op,
     "-": minus_op,
     "*": times_op,
@@ -312,4 +312,4 @@ BUILTINS = {
     "push": push_op,
     "pop": pop_op,
     "el": el_op,
-}  # type: Dict[str, Callable[[LList, Dict], Atom]]
+}

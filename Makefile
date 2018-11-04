@@ -1,10 +1,23 @@
+MODULES  = llisp tests
+VENV = venv
+PYTHON = python3
+
 test:
-	pytest tests.py
+	pytest tests/*.py
 
 format:
-	black *.py
+	isort -rc $(MODULES)
+	black .
 
 lint:
-	mypy main.py lbuiltins.py
+	isort -rc --check-only $(MODULES)
+	flake8
+	mypy llisp
 
-PHONY: format lint test
+venv:
+	virtualenv -p $(PYTHON) $(VENV)
+
+install_dev: venv
+	$(VENV)/bin/pip install -r requirements.txt
+
+PHONY: format lint test install_dev

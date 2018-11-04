@@ -1,11 +1,13 @@
-import pytest
 from typing import Dict, List
-from main import listing
-from lbuiltins import is_int
+
+import pytest
+
+from llisp.lbuiltins import is_int
+from llisp.parser import listing
 
 
 def simple_multi(test_inputs: List[str], expected: str) -> None:
-    state = {}  # type: Dict[str, object]
+    state: Dict[str, object] = {}
     out = None
     for t in test_inputs:
         e = listing(t, None)

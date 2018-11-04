@@ -11,6 +11,10 @@ venv/
 .dmypy.json
 dmypy.json
 
+# Distribution / packaging
+*.egg-info/
+*.egg
+
 ### Vim ###
 # Swap
 [._]*.s[a-v][a-z]
