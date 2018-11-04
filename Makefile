@@ -3,7 +3,7 @@ VENV = venv
 PYTHON = python3
 
 test:
-	pytest tests/*.py
+	pytest --cov llisp tests/*.py
 
 format:
 	isort -rc $(MODULES)
