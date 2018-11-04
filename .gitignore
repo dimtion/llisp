@@ -15,6 +15,9 @@ dmypy.json
 *.egg-info/
 *.egg
 
+# Tests
+.coverage
+
 ### Vim ###
 # Swap
 [._]*.s[a-v][a-z]
