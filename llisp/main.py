@@ -8,7 +8,7 @@ from typing import Dict
 
 from llisp.parser import listing
 
-sys.setrecursionlimit(100000)
+sys.setrecursionlimit(100_000)
 
 
 def execute_file(filename: str, state: Dict, debug=False) -> int:
