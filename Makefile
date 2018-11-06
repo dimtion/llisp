@@ -20,5 +20,6 @@ venv:
 
 install_dev: venv
 	$(VENV)/bin/pip install -r requirements.txt
+	$(VENV)/bin/pre-commit install
 
 PHONY: format lint test install_dev
