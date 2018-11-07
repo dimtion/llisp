@@ -9,4 +9,5 @@
                 0)
             (result (- m 1) a b))))
 
-(print (result (- 1000 1) 5 3))
+(var output (result (- 1000 1) 5 3))
+(print output)

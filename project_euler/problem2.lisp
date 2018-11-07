@@ -15,4 +15,6 @@
 
 (var limit 34)
 (print (fib limit))
-(print (sumfib limit))
+(var output (sumfib limit))
+
+(print output)
