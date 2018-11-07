@@ -62,19 +62,62 @@ def test_compute_plus(test_input: str, expected: str) -> None:
 @pytest.mark.parametrize(
     "test_input,expected",
     [
-        ("1 ", "1"),
-        (" 1", "1"),
-        ("( 1)", "1"),
-        ("(1 )", "1"),
-        ("( + 1 1)", "2"),
-        ("(+  1 1)", "2"),
-        ("( +  1 1)", "2"),
-        ("( + 1 (+ 1 1) )", "3"),
+        ("(/ 1 1)", "1.0"),
+        ("(/ 1 2)", "0.5"),
+        ("(/ 10 5)", "2.0"),
+        ("(/ 10 3)", "3.3333333333333335"),
+        ("(/ 5.5 2)", "2.75"),
+        ("(/ -10 5)", "-2.0"),
+        ("(/ 10 -5)", "-2.0"),
     ],
 )
-def test_input_variants(test_input: str, expected: str) -> None:
+def test_compute_divide(test_input: str, expected: str) -> None:
     e = listing(test_input, None)
-    print(f"EXPR::{e}")
+    assert str(e.evaluate({}).value) == expected
+
+
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        ("(// 1 1)", "1"),
+        ("(// 13.5 1)", "13.0"),
+        ("(// 1 2)", "0"),
+        ("(// 10 5)", "2"),
+        ("(// 10 3)", "3"),
+        ("(// 5.5 2)", "2.0"),
+        ("(// -10 5)", "-2"),
+        ("(// 10 -5)", "-2"),
+    ],
+)
+def test_compute_divide_int(test_input: str, expected: str) -> None:
+    e = listing(test_input, None)
+    assert str(e.evaluate({}).value) == expected
+
+
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        ("(% 1 1)", "0"),
+        ("(% 13.5 1)", "0.5"),
+        ("(% 1 2)", "1"),
+        ("(% 10 5)", "0"),
+        ("(% 10 3)", "1"),
+        ("(% 5.5 2)", "1.5"),
+        ("(% -10 5)", "0"),
+        ("(% 10 -5)", "0"),
+    ],
+)
+def test_compute_mod(test_input: str, expected: str) -> None:
+    e = listing(test_input, None)
+    assert str(e.evaluate({}).value) == expected
+
+
+@pytest.mark.skip("The ! operator is not a builtin, but a std")
+@pytest.mark.parametrize(
+    "test_input,expected", [("(! 1)", "0"), ("(! 0)", "1"), ("(! 10)", "0")]
+)
+def test_compute_not(test_input: str, expected: str) -> None:
+    e = listing(test_input, None)
     assert str(e.evaluate({}).value) == expected
 
 
@@ -88,6 +131,42 @@ def test_input_variants(test_input: str, expected: str) -> None:
     ],
 )
 def test_compute_minus(test_input: str, expected: str) -> None:
+    e = listing(test_input, None)
+    assert str(e.evaluate({}).value) == expected
+
+
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        ("(echo 1)", "1"),
+        ("(echo 1.)", "1.0"),
+        ("(echo '%')", "%"),
+        # TODO: possible bug here, we might want to echo "test" or ['t', 'e', 's', 't']
+        (
+            '(echo "test")',
+            "[(AtomTypes.CHAR) t, (AtomTypes.CHAR) e, (AtomTypes.CHAR) s, (AtomTypes.CHAR) t]",
+        ),
+    ],
+)
+def test_compute_echo(test_input: str, expected: str) -> None:
+    e = listing(test_input, None)
+    assert str(e.evaluate({}).value) == expected
+
+
+# TODO: the difference between echo and print is... strange
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        ("(print 1)", "1"),
+        ("(print 1.)", "1.0"),
+        ("(print '%')", "%"),
+        (
+            '(print "test")',
+            "[(AtomTypes.CHAR) t, (AtomTypes.CHAR) e, (AtomTypes.CHAR) s, (AtomTypes.CHAR) t]",
+        ),
+    ],
+)
+def test_compute_print(test_input: str, expected: str) -> None:
     e = listing(test_input, None)
     assert str(e.evaluate({}).value) == expected
 
