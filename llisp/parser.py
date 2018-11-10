@@ -1,6 +1,6 @@
 from typing import List, Tuple, Union
 
-from llisp.lbuiltins import Atom, LList
+from llisp.lbuiltins import Atom, LList, create_atom
 
 
 def lexer(expr: str) -> Tuple[List[str], int]:
@@ -44,7 +44,7 @@ def lexer(expr: str) -> Tuple[List[str], int]:
 
 
 def expand_str(expr: List[str], max_depth) -> Union[List[str], Atom]:
-    """Create a list of char from the string notation"""
+    """Create a list of char from the string notation or return an atom object"""
     if len(expr) == 1 and max_depth == 0:
         current_expr = expr[0].strip()
         if current_expr[0] == current_expr[-1] == '"':
@@ -56,7 +56,7 @@ def expand_str(expr: List[str], max_depth) -> Union[List[str], Atom]:
             expr[0] = new_expr
 
         else:
-            return Atom(expr[0].strip())
+            return create_atom(expr[0].strip())
 
     return expr
 

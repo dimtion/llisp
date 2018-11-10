@@ -43,14 +43,7 @@ class Atom(object):
             raise Exception(f"Parse ERROR: {self.value_str}")
 
     def evaluate(self, state: Dict) -> "Atom":
-        if self.type == self.AtomTypes.NAME:
-            if self.value in state:
-                return state[self.value].evaluate(state)
-        elif self.type in [
-            self.AtomTypes.LIST,
-            self.AtomTypes.NUM,
-            self.AtomTypes.CHAR,
-        ]:
+        if self.type in [self.AtomTypes.LIST, self.AtomTypes.NUM, self.AtomTypes.CHAR]:
             return self
 
         raise Exception(f"Cannot evaluate {self}")
@@ -84,6 +77,53 @@ class Atom(object):
         return f"({self.type}) {self.value}"
 
 
+class Name(Atom):
+    def __init__(
+        self,
+        name: str,
+        body: Union[Atom, "LList", None] = None,
+        params: Union["LList", None] = None,
+    ):
+        self.name = name
+        self.params = params
+        self.value = body
+        self.value_str = name
+        self.type = self.AtomTypes.NAME
+
+    def evaluate(self, state: Dict) -> Atom:
+        if self.value in state:
+            return state[self.name].evaluate(state)
+        raise Exception(f"{self.name} Undefined")
+
+    def evaluate_proc(self, state: Dict, sub_state: Dict) -> Atom:
+        temp_state = {**state, **sub_state}
+        if isinstance(self.value, LList):
+            for child in self.value.childs[2:]:
+                result = child.evaluate(temp_state)
+        return result
+
+
+def create_atom(value: str) -> Union["Atom", "Name"]:
+    atom = Atom(value)
+    if is_int(value):
+        atom.value = int(value)
+        atom.type = atom.AtomTypes.NUM
+    elif is_float(value):
+        atom.value = float(value)
+        atom.type = atom.AtomTypes.NUM
+    elif is_char(value):
+        iner_char = bytes(value[1:-1], "utf-8").decode("unicode_escape")
+        if len(iner_char) > 1:
+            raise Exception(f"Parse ERROR: {value} is not a CHAR")
+        atom.value = iner_char
+        atom.type = atom.AtomTypes.CHAR
+    elif is_name(value):
+        atom = Name(value)
+        atom.value = atom.value_str
+        atom.type = atom.AtomTypes.NAME
+    return atom
+
+
 def is_int(s: str) -> bool:
     try:
         int(s)
@@ -115,21 +155,6 @@ def is_name(s: str) -> bool:
         if not l.isalnum() and l not in "*+-/<>=!@#$%^&[]":
             return False
     return True
-
-
-class Proc(Atom):
-    def __init__(self, name: "Atom", params: "LList", body: "LList"):
-        self.name = name
-        self.params = params
-        self.body = body
-        self.value = name
-        self.type = self.AtomTypes.PROC
-
-    def evaluate_proc(self, state: Dict, sub_state: Dict) -> Atom:
-        temp_state = {**state, **sub_state}
-        for child in self.body.childs[2:]:
-            result = child.evaluate(temp_state)
-        return result
 
 
 class LList(object):
@@ -248,7 +273,7 @@ def var_op(expr: "LList", state: Dict) -> "Atom":
         raise Exception("Unexpected format")
 
 
-def def_op(expr: "LList", state: Dict) -> "Atom":
+def def_op(expr: "LList", state: Dict) -> Atom:
     if isinstance(expr.childs[1], LList):
         name = expr.childs[1].childs[0]
         params = LList()
@@ -258,7 +283,7 @@ def def_op(expr: "LList", state: Dict) -> "Atom":
         if not isinstance(name, Atom):
             raise Exception(f"Unexpected format of function name f{name}")
 
-        a = Proc(name, params, body)
+        a = Name(name.value, body, params)
         state[name.value] = a
         # print(f"<<< ({a} {a.params})")
         return name
@@ -267,7 +292,7 @@ def def_op(expr: "LList", state: Dict) -> "Atom":
 
 def custom_op(name: str, expr: "LList", state: Dict) -> "Atom":
     proc = state[name]
-    if proc.type == Atom.AtomTypes.PROC:
+    if proc.type == Atom.AtomTypes.NAME:
         sub_state: Dict[str, Union[LList, Atom]] = {}
         for p, c in zip(proc.params.childs, expr.childs[1:]):
             sub_state[p.value_str] = c.evaluate(state)
