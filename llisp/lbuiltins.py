@@ -95,7 +95,7 @@ class Name(Atom):
             return state[self.name].evaluate(state)
         raise Exception(f"{self.name} Undefined")
 
-    def evaluate_proc(self, state: Dict, sub_state: Dict) -> Atom:
+    def call_proc(self, state: Dict, sub_state: Dict) -> Atom:
         temp_state = {**state, **sub_state}
         if isinstance(self.value, LList):
             for child in self.value.childs[2:]:
@@ -157,18 +157,24 @@ def is_name(s: str) -> bool:
     return True
 
 
+class Expression(object):
+    pass
+
+
+class Program(object):
+    pass
+
+
 class LList(object):
     def __init__(self):
         self.childs: List[Union[LList, Atom]] = []
 
     def evaluate(self, state: Union[Dict]) -> Atom:
         action = self.childs[0]
-        if not isinstance(action, Atom):
+        if isinstance(action, LList):
             for child in self.childs:
                 result = child.evaluate(state)
             return result
-        if action.type == Atom.AtomTypes.NUM:
-            return action
         if action.type == Atom.AtomTypes.NAME:
             if action.value_str in BUILTINS:
                 return BUILTINS[action.value_str](self, state)
@@ -297,7 +303,7 @@ def custom_op(name: str, expr: "LList", state: Dict) -> "Atom":
         for p, c in zip(proc.params.childs, expr.childs[1:]):
             sub_state[p.value_str] = c.evaluate(state)
         # print(f"Evaluating {proc} with {state} and {sub_state}")
-        return proc.evaluate_proc(state, sub_state)
+        return proc.call_proc(state, sub_state)
     raise Exception(f"{name} not a procedure")
 
 
