@@ -50,6 +50,21 @@ Function declaration and function call:
 <<< 50
 ```
 
+List management:
+```
+>>> (var l (list 1 2 3))
+<<< l
+>>> l
+<<< [(AtomTypes.NUM) 1, (AtomTypes.NUM) 2, (AtomTypes.NUM) 3]
+>>> (pop l)
+<<< [(AtomTypes.NUM) 2, (AtomTypes.NUM) 3]
+>>> (push 0 l)
+<<< [(AtomTypes.NUM) 0, (AtomTypes.NUM) 1, (AtomTypes.NUM) 2, (AtomTypes.NUM) 3]
+>>> (el l)
+<<< 1
+```
+
+
 ## Features
 
 Those are the features that are currently implemented, more to come in the
