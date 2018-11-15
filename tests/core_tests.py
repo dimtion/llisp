@@ -2,7 +2,7 @@ from typing import Dict, List
 
 import pytest
 
-from llisp.lbuiltins import is_int
+from llisp.lbuiltins import NotCallable, ParseError, UndefinedError, is_int
 from llisp.parser import listing
 
 
@@ -57,6 +57,39 @@ def test_compute_char(test_input: str, expected: str) -> None:
 def test_compute_plus(test_input: str, expected: str) -> None:
     e = listing(test_input, None)
     assert str(e.evaluate({}).value) == expected
+
+
+@pytest.mark.parametrize(
+    "test_input",
+    [
+        "(var)",
+        "(var bla bla bla)",
+        "(def 5)",
+        "(def blah bloh)",
+        "(var 'ds')",
+        "(var ))",
+    ],
+)
+def testParseError(test_input: str) -> None:
+    with pytest.raises(ParseError):
+        e = listing(test_input, None)
+        e.evaluate({})
+
+
+@pytest.mark.parametrize("test_input", ["(a)", "(var a a)", "(list a b)"])
+def testUndefinedError(test_input: str) -> None:
+    with pytest.raises(UndefinedError):
+        e = listing(test_input, None)
+        e.evaluate({})
+
+
+@pytest.mark.parametrize(
+    "test_input", ["(var a 10) (a 10)", "(var x (list 1 10)) (x 10)"]
+)
+def testNotCallableError(test_input: str) -> None:
+    with pytest.raises(NotCallable):
+        e = listing(test_input, None)
+        e.evaluate({})
 
 
 @pytest.mark.parametrize(

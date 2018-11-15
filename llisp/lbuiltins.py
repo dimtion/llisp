@@ -3,6 +3,18 @@ from enum import Enum
 from typing import Any, Callable, Dict, List, Union
 
 
+class ParseError(Exception):
+    pass
+
+
+class UndefinedError(Exception):
+    pass
+
+
+class NotCallable(Exception):
+    pass
+
+
 class Atom(object):
     class AtomTypes(Enum):
         NUM = 1
@@ -33,14 +45,14 @@ class Atom(object):
         elif is_char(self.value_str):
             iner_char = bytes(self.value_str[1:-1], "utf-8").decode("unicode_escape")
             if len(iner_char) > 1:
-                raise Exception(f"Parse ERROR: {self.value_str} is not a CHAR")
+                raise ParseError(f"Parse ERROR: {self.value_str} is not a CHAR")
             self.value = iner_char
             self.type = self.AtomTypes.CHAR
         elif is_name(self.value_str):
             self.value = self.value_str
             self.type = self.AtomTypes.NAME
         else:
-            raise Exception(f"Parse ERROR: {self.value_str}")
+            raise ParseError(f"Parse ERROR: {self.value_str}")
 
     def evaluate(self, state: Dict) -> "Atom":
         if self.type in [self.AtomTypes.LIST, self.AtomTypes.NUM, self.AtomTypes.CHAR]:
@@ -93,7 +105,7 @@ class Name(Atom):
     def evaluate(self, state: Dict) -> Atom:
         if self.value in state:
             return state[self.name].evaluate(state)
-        raise Exception(f"{self.name} Undefined")
+        raise UndefinedError(f"{self.name} Undefined")
 
     def call_proc(self, state: Dict, sub_state: Dict) -> Atom:
         temp_state = {**state, **sub_state}
@@ -114,7 +126,7 @@ def create_atom(value: str) -> Union["Atom", "Name"]:
     elif is_char(value):
         iner_char = bytes(value[1:-1], "utf-8").decode("unicode_escape")
         if len(iner_char) > 1:
-            raise Exception(f"Parse ERROR: {value} is not a CHAR")
+            raise ParseError(f"Parse ERROR: {value} is not a CHAR")
         atom.value = iner_char
         atom.type = atom.AtomTypes.CHAR
     elif is_name(value):
@@ -181,7 +193,7 @@ class LList(object):
             elif action.value_str in state:
                 return custom_op(action.value_str, self, state)
 
-        raise Exception(f"ERR: Symbol {action} unknown")
+        raise UndefinedError(f"ERR: Symbol {action} unknown")
 
     def __eq__(self, other):
         if len(self.childs) != len(other.childs):
@@ -271,12 +283,16 @@ def less_op(expr: "LList", state: Dict) -> "Atom":
 
 
 def var_op(expr: "LList", state: Dict) -> "Atom":
-    if isinstance(expr.childs[1], Atom) and expr.childs[1].type == Atom.AtomTypes.NAME:
+    if (
+        len(expr.childs) == 3
+        and isinstance(expr.childs[1], Atom)
+        and expr.childs[1].type == Atom.AtomTypes.NAME
+    ):
         state[expr.childs[1].value] = expr.childs[2].evaluate(state)
         # print(f"<<< {expr.childs[1].value} = {expr.childs[2]}")
         return expr.childs[1]
     else:
-        raise Exception("Unexpected format")
+        raise ParseError("Parse error: Unexpected format")
 
 
 def def_op(expr: "LList", state: Dict) -> Atom:
@@ -287,13 +303,13 @@ def def_op(expr: "LList", state: Dict) -> Atom:
         body = expr
 
         if not isinstance(name, Atom):
-            raise Exception(f"Unexpected format of function name f{name}")
+            raise ParseError(f"Parse error: Unexpected format of function name f{name}")
 
         a = Name(name.value, body, params)
         state[name.value] = a
         # print(f"<<< ({a} {a.params})")
         return name
-    raise Exception("Unexpected format")
+    raise ParseError("Parse error: Unexpected format")
 
 
 def custom_op(name: str, expr: "LList", state: Dict) -> "Atom":
@@ -304,7 +320,7 @@ def custom_op(name: str, expr: "LList", state: Dict) -> "Atom":
             sub_state[p.value_str] = c.evaluate(state)
         # print(f"Evaluating {proc} with {state} and {sub_state}")
         return proc.call_proc(state, sub_state)
-    raise Exception(f"{name} not a procedure")
+    raise NotCallable(f"{name} not a procedure")
 
 
 def echo_op(expr: "LList", state: Dict) -> "Atom":
@@ -336,7 +352,7 @@ def push_op(expr: "LList", state: Dict) -> "Atom":
         for c in old_list.value.childs:
             new_list.childs.append(copy.deepcopy(c))
     else:
-        raise Exception("Cannot push")
+        raise Exception("Cannot push: not a list")
 
     return Atom(new_list)
 
