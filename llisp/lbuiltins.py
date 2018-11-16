@@ -60,7 +60,7 @@ class Atom(object):
 
         raise Exception(f"Cannot evaluate {self}")
 
-    # For num
+    # For NUM type
     def plus(self, other: "Atom"):
         return Atom(str(self.value + other.value))
 
@@ -76,6 +76,7 @@ class Atom(object):
     def divide_int(self, other: "Atom"):
         return Atom(str(self.value // other.value))
 
+    # Primitives for every Atom
     def __eq__(self, other):
         return self.type == other.type and self.value == other.value
 
@@ -103,6 +104,10 @@ class Name(Atom):
         self.type = self.AtomTypes.NAME
 
     def evaluate(self, state: Dict) -> Atom:
+        """
+        Name evaluation that makes the correspondance between the Name and
+        the corresponding Atom
+        """
         if self.value in state:
             return state[self.name].evaluate(state)
         raise UndefinedError(f"{self.name} Undefined")
@@ -134,6 +139,9 @@ def create_atom(value: str) -> Union["Atom", "Name"]:
         atom.value = atom.value_str
         atom.type = atom.AtomTypes.NAME
     return atom
+
+
+# Parsing functions
 
 
 def is_int(s: str) -> bool:
@@ -184,6 +192,10 @@ class LList(object):
     def evaluate(self, state: Union[Dict]) -> Atom:
         action = self.childs[0]
         if isinstance(action, LList):
+            # If the childs are LList that means that we want to execute them
+            # linearly. We return the result of the last child.
+            # TODO: This should move into a `Program`, but what about a
+            # function which is also a list of LList
             for child in self.childs:
                 result = child.evaluate(state)
             return result
