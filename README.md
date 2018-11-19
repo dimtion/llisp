@@ -3,6 +3,7 @@ Loïc Lisp Interpreter (Llisp)
 [![Build Status](https://travis-ci.org/dimtion/llisp.svg?branch=master)](https://travis-ci.org/dimtion/llisp)
 [![Coverage Status](https://coveralls.io/repos/github/dimtion/llisp/badge.svg?branch=master)](https://coveralls.io/github/dimtion/llisp?branch=master)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
+[![GitHub license](https://img.shields.io/github/license/dimtion/llisp.svg)](https://github.com/dimtion/llisp/blob/master/LICENSE)
         
 A simple Lisp interpreter for educational purposes.
 
