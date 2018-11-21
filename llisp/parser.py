@@ -1,6 +1,6 @@
 from typing import List, Tuple, Union
 
-from llisp.lbuiltins import Atom, LList, create_atom
+from llisp.lbuiltins import Atom, LList, Program, create_atom
 
 
 def lexer(expr: str) -> Tuple[List[str], int]:
@@ -77,3 +77,13 @@ def listing(expr: str, parent: Union[None, LList] = None) -> Union[Atom, LList]:
     if isinstance(expanded_tokens, Atom):
         return expanded_tokens
     return atomize(tokens)
+
+
+def create_program(expr: str) -> Program:
+    prog = Program()
+    llist = listing(expr)
+    if isinstance(llist, LList):
+        prog.childs = llist.childs
+    else:
+        prog.childs = [llist]
+    return prog

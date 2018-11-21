@@ -182,7 +182,15 @@ class Expression(object):
 
 
 class Program(object):
-    pass
+    """A program is a list of LLists that can be run sequentially"""
+
+    def __init__(self):
+        self.childs: List[Union[LList, Atom]] = []
+
+    def run(self, state: Union[Dict]) -> Atom:
+        for child in self.childs:
+            result = child.evaluate(state)
+        return result
 
 
 class LList(object):
