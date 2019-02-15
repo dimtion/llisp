@@ -7,8 +7,10 @@ from llisp.main import execute_file, load_std
 from tests.std_tests import std_state  # noqa: F401
 
 
-def simple_test_file(  # noqa: F811
-    std_state: Dict[str, Union[LList, Atom]], test_file: str, expected: str
+def simple_test_file(
+    std_state: Dict[str, Union[LList, Atom]],  # noqa: F811
+    test_file: str,
+    expected: str,
 ) -> None:
     state = std_state
     load_std(state)
@@ -24,5 +26,7 @@ def simple_test_file(  # noqa: F811
         ("project_euler/problem2.lisp", 4_613_732),
     ],
 )
-def test_problem(std_state: Dict[str, object], test_file: str, expected: str) -> None:
+def test_problem(
+    std_state: Dict[str, object], test_file: str, expected: str  # noqa: F811
+) -> None:
     return simple_test_file(std_state, test_file, expected)
