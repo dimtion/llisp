@@ -2,24 +2,26 @@ MODULES  = llisp tests
 VENV = venv
 PYTHON = python3
 
+VENV_PYTHON ?= $(VENV)/bin/python
+
 test:
-	pytest --cov llisp tests/*.py
+	$(VENV_PYTHON) -m pytest --cov llisp tests/*.py
 
 format:
-	isort -rc $(MODULES)
-	black .
+	$(VENV_PYTHON) -m isort $(MODULES)
+	$(VENV_PYTHON) -m black .
 
 lint:
-	flake8
-	mypy llisp
-	isort -rc --check-only $(MODULES)
-	black --check .
+	$(VENV_PYTHON) -m flake8
+	$(VENV_PYTHON) -m mypy llisp
+	$(VENV_PYTHON) -m isort --check-only $(MODULES)
+	$(VENV_PYTHON) -m black --check .
 
-venv:
+$(VENV):
 	virtualenv -p $(PYTHON) $(VENV)
 
-install_dev: venv
-	$(VENV)/bin/pip install -r requirements.txt
-	$(VENV)/bin/pre-commit install
+install_dev: $(VENV)
+	$(VENV_PYTHON) -m pip install -r requirements.txt
+	$(VENV_PYTHON) -m pre-commit install
 
 PHONY: format lint test install_dev

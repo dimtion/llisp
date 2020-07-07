@@ -171,8 +171,8 @@ def is_name(s: str) -> bool:
     if is_int(s[0]):
         return False
 
-    for l in s:
-        if not l.isalnum() and l not in "*+-/<>=!@#$%^&[]":
+    for char in s:
+        if not char.isalnum() and char not in "*+-/<>=!@#$%^&[]":
             return False
     return True
 
