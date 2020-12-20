@@ -30,7 +30,7 @@ def simple_multi(test_inputs: List[str], expected: str) -> None:
     ],
 )
 def test_is_int(test_input: str, expected: bool) -> None:
-    is_int(test_input) == expected
+    assert is_int(test_input) == expected
 
 
 @pytest.mark.parametrize(

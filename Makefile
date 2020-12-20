@@ -1,7 +1,7 @@
 MODULES  = llisp tests
-VENV = venv
 PYTHON = python3
 
+VENV ?= venv
 VENV_PYTHON ?= $(VENV)/bin/python
 
 test:
